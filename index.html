@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apollo Micro Systems (AMS)</title>
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="header-bar-flex">
+    <div class="header-left">
+        <img src="logo.png" alt="Logo" class="header-logo">
+    </div>
+    <nav class="header-menu">
+        <a href="#" class="menu-link active">Dashboard</a>
+        <a href="#" class="menu-link">File Upload</a>
+        <a href="#" class="menu-link">Movement Register</a>
+        <a href="#" class="menu-link">Benpos</a>
+        <a href="#" class="menu-link">Contact Master</a>
+    </nav>
+    <div class="header-profile" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" onclick="toggleProfileDropdown(event)" onkeydown="profileKeyHandler(event)">
+        <div class="profile-icon">A</div>
+        <div class="profile-dropdown" id="profileDropdown">
+            <button type="button" onclick="resetPassword(event)">Reset Password</button>
+            <button type="button" onclick="logout(event)">Logout</button>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <aside class="sidebar">
+        <div style="width:100%">
+            <div class="filters-header-row">
+                <span class="filters-title">Filters</span>
+                <div class="filter-actions">
+                    <button class="apply-btn" type="button" onclick="applyFilters()">Apply</button>
+                    <button class="clear-btn" type="button" onclick="clearFilters()">Clear</button>
+                </div>
+            </div>
+            <form class="filters" id="filtersForm" onsubmit="event.preventDefault(); applyFilters();">
+                <label>PAN Number<input type="text" name="pan"></label>
+                <label>CLID<input type="text" name="clid"></label>
+                <label>Holder Name<input type="text" name="holder"></label>
+                <label>Category
+                    <select name="category">
+                        <option value="">Select</option>
+                        <option>Individual</option>
+                        <option>Corporate</option>
+                        <option>HUF</option>
+                        <option>Trust</option>
+                    </select>
+                </label>
+                <label>City<input type="text" name="city"></label>
+                <label>Mobile Number<input type="text" name="mobile"></label>
+                <label>Email<input type="email" name="email"></label>
+                <label>Snapshot Date<input type="date" name="snapshot"></label>
+                <label>Movement Date Range
+                    <input type="date" name="move_from"> 
+                    <span style="display: block; padding: 2px">to</span> 
+                    <input type="date" name="move_to">
+                </label>
+                <label>Date of Birth<input type="date" name="dob"></label>
+            </form>
+        </div>
+    </aside>
+    <main class="main dashboard-padding">
+        <div class="header">Investor Analytics Dashboard</div>
+        <div class="overview">
+            <div class="overview-card">
+                <div class="icon wallet">
+                    <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="none"/><path d="M5 8.5A2.5 2.5 0 0 1 7.5 6h9A2.5 2.5 0 0 1 19 8.5v7A2.5 2.5 0 0 1 16.5 18h-9A2.5 2.5 0 0 1 5 15.5v-7Z" fill="#6366f1"/><rect x="13" y="12" width="3" height="2" rx="1" fill="#a5b4fc"/></svg>
+                </div>
+                <div class="card-content">
+                    <h3>Total Holding</h3>
+                    <div class="value">₹2,45,67,890</div>
+                    <div class="desc green">+12.5% from last month</div>
+                </div>
+            </div>
+            <div class="overview-card">
+                <div class="icon pledge">
+                    <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="none"/><path d="M7.5 12.5l2 2 5-5" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="4" width="16" height="16" rx="8" fill="#fed7aa"/></svg>
+                </div>
+                <div class="card-content">
+                    <h3>Pledged Quantity</h3>
+                    <div class="value">45,234</div>
+                    <div class="desc orange">8.2% of total holdings</div>
+                </div>
+            </div>
+            <div class="overview-card">
+                <div class="icon lock">
+                    <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="none"/><rect x="7" y="11" width="10" height="6" rx="2" fill="#fecaca"/><path d="M9 11V9a3 3 0 1 1 6 0v2" stroke="#dc2626" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="card-content">
+                    <h3>Locked Holding</h3>
+                    <div class="value">12,567</div>
+                    <div class="desc red">2.8% of total holdings</div>
+                </div>
+            </div>
+        </div>
+        <div class="charts">
+            <div class="chart-card">
+                <div class="chart-title">Buy/Sell Overview</div>
+                <canvas id="barChart" height="120"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Demat/Remat Trends</div>
+                <canvas id="lineChart" height="120"></canvas>
+            </div>
+        </div>
+        <div class="header" style="margin-bottom: 8px;">Risk & Exception Flags</div>
+        <div class="flags">
+            <div class="flag red">
+                <span class="flag-icon">&#9888;</span>
+                <div>
+                    <div class="flag-title">Duplicate PANs</div>
+                    <div class="flag-desc">23 records found</div>
+                </div>
+            </div>
+            <div class="flag yellow">
+                <span class="flag-icon">&#8505;</span>
+                <div>
+                    <div class="flag-title">Missing Contact Info</div>
+                    <div class="flag-desc">156 records incomplete</div>
+                </div>
+            </div>
+            <div class="flag blue">
+                <span class="flag-icon">&#9432;</span>
+                <div>
+                    <div class="flag-title">PAN Mismatch</div>
+                    <div class="flag-desc">8 BENPOS vs Master</div>
+                </div>
+            </div>
+        </div>
+        <div class="export-row">
+            <span class="export-title">Export Data</span>
+            <button class="export-btn csv"><svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="18" height="18" rx="4" fill="#fff"/><path d="M6 7h6v1H6V7zm0 2h6v1H6V9zm0 2h4v1H6v-1z" fill="#fff"/><rect x="2" y="2" width="14" height="14" rx="3" fill="#22c55e"/><path d="M6 7h6v1H6V7zm0 2h6v1H6V9zm0 2h4v1H6v-1z" fill="#fff"/></svg> Export CSV</button>
+            <button class="export-btn pdf"><svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="18" height="18" rx="4" fill="#fff"/><rect x="2" y="2" width="14" height="14" rx="3" fill="#ef4444"/><path d="M6 7h6v1H6V7zm0 2h6v1H6V9zm0 2h4v1H6v-1z" fill="#fff"/></svg> Export PDF</button>
+        </div>
+    </main>
+</div>
+<script>
+// Chart.js Bar Chart
+const barCtx = document.getElementById('barChart').getContext('2d');
+const barChart = new Chart(barCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [
+            {
+                label: 'Buy',
+                data: [18, 22, 25, 27, 23, 26],
+                backgroundColor: '#22c55e',
+                borderRadius: 4,
+            },
+            {
+                label: 'Sell',
+                data: [12, 14, 15, 13, 14, 16],
+                backgroundColor: '#ef4444',
+                borderRadius: 4,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: true, position: 'bottom' }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+
+// Chart.js Line Chart
+const lineCtx = document.getElementById('lineChart').getContext('2d');
+const lineChart = new Chart(lineCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [
+            {
+                label: 'Demat',
+                data: [45, 48, 50, 47, 49, 55],
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37,99,235,0.1)',
+                tension: 0.3,
+                fill: false,
+                pointRadius: 3,
+            },
+            {
+                label: 'Remat',
+                data: [15, 18, 20, 19, 18, 22],
+                borderColor: '#f59e42',
+                backgroundColor: 'rgba(245,158,66,0.1)',
+                tension: 0.3,
+                fill: false,
+                pointRadius: 3,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: true, position: 'bottom' }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+
+function applyFilters() {
+    alert('Filters applied! (Demo only)');
+    // Add your filter logic here
+}
+function clearFilters() {
+    document.getElementById('filtersForm').reset();
+}
+function toggleProfileDropdown(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('profileDropdown');
+    dropdown.classList.toggle('show');
+    const profile = event.currentTarget;
+    profile.setAttribute('aria-expanded', dropdown.classList.contains('show'));
+}
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('profileDropdown');
+    if (dropdown && dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+        document.querySelector('.header-profile').setAttribute('aria-expanded', 'false');
+    }
+});
+function profileKeyHandler(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+        toggleProfileDropdown(event);
+    }
+}
+function resetPassword(event) {
+    event.preventDefault();
+    alert('Reset Password clicked!');
+}
+function logout(event) {
+    event.preventDefault();
+    alert('Logout clicked!');
+}
+</script>
+</body>
+</html>
